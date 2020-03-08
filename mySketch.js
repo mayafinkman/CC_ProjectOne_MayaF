@@ -13,6 +13,7 @@
 
 to make multiple sketches: make a counter to add to every time a squiggle is finished
 */
+	//sketch one variables
 	let randHeight = 0; //how high the line goes, intialized to zero for purpose of becoming random when first begins
 	let randWidth; //how wide the line moves
 	let randX; //what x val the line goes to
@@ -22,11 +23,19 @@ to make multiple sketches: make a counter to add to every time a squiggle is fin
 	let counter = 0; //for switching the screens
 	let colorArr= [0,0,0];
 
+//sketch two variables
+	let img2Circles = [];
+
 function setup() {
 	createCanvas(windowWidth, windowHeight);
 	background(255);
 	frameRate(90);
 	previousCount = 0;
+	
+	//set up img2Circles with circleOb objects
+	for (let i=0; i<25; i++){
+		img2Circles[i] = new CircleOb();
+	}
 }
 
 function draw() {
@@ -93,8 +102,35 @@ function image1(){ //first sketch
 			print("y is: " +  y  + " randHeight is: " + randHeight);*/
 			point((randX+x),(windowHeight-y)); //draw point
 		}
-function image2()
-{
+
+function image2(thisOb){
+//as the circles get drawn moving up, they get larger
+	thisOb.grow();
+	thisOb.display();
 	
+}
+
+class CircleOb{
+	//want it to move back and forth - use a vector
+	//want it to grow in size each time
+	
+	//variables
+	constructor(){
+		this.size = 20;
+		this.xPos = windowWidth/2;
+		this.yPos = windowHeight/2;
+	}
+	
+	grow(){
+		this.size=this.size+20;
+		print(this.size);
+	}
+	
+	display(){
+		strokeWeight(3);
+		stroke(232,51,90);
+		fill(232,51,90,50);
+		circle(this.xPos, this.yPos, this.size);
+	}
 	
 }
