@@ -83,7 +83,8 @@ function draw() {
 		img4Triangles[i] = new thinTriangle();
 	}
 	if(counter<10){ //first drawing
-			image1();	
+		frameRate(200);	
+		image1();	
 	}
 	else if(counter==10){ //reset for second drawing
 		background(255);
