@@ -26,6 +26,9 @@ Creative Coding: Project One
 			
 			ADJECTIVE: growing
 			- more specifically, looking at the way we as humans grow in our lives
+			
+			UPDATED VERSION: make them grow into each other, so transition between sketches isnt as harsh, seems like a continuous growth
+			
 		
 */
 	//sketch one variables
@@ -35,8 +38,16 @@ Creative Coding: Project One
 	let x=0;
 	let y=0;
 	let widthCounter=0;
-	let counter = 0; //for switching the screens
+	let counter = 6; //for switching the screens
 	let colorArr= [20,20,20];
+
+//transition from 1 to 2 variables
+let leftX; //value for left line
+let middleX; // value for middle line
+let rightX; //value for right line
+let transitionHeight; //value for the height of the squigles in the transition
+let strokeDone = false;
+
 
 //sketch two variables
 	let img2Circles = [];
@@ -59,6 +70,10 @@ function setup() {
 	background(200);
 	frameRate(200);
 	previousCount = 0;
+	transitionHeight = (windowHeight / 3) * 2;
+	leftX = windowWidth / 4;
+	middleX = windowWidth / 2;
+	rightX = (windowWidth / 4)* 3;
 	
 	//set up img2Circles with circleOb objects
 	for (let i = 0; i < 25; i++) {
@@ -82,65 +97,30 @@ function draw() {
 	for (let i = 0; i < 25; i++) {
 		img4Triangles[i] = new thinTriangle();
 	}
-	if(counter<10){ //first drawing
-		frameRate(200);	
-		image1();	
+	if (counter < 8) { //first drawing
+		frameRate(200);
+		image1();
 	}
-	else if(counter==10){ //reset for second drawing
-		background(255);
+	else if (counter == 8) { //reset for second drawing
+		colorArr = [20, 20, 20];
+		y = 0;
+		widthCounter = 0;
+		x=0;
 		counter++;
 	}
-	
-	else if(counter>10 && counter<85){ //second drawing
-		frameRate(10);
-		if (coneCount<25){	
-			image2(img2Circles);
-			coneCount++;
-		}
-		else if (coneCount>=25 && coneCount<50){ //second drawing right
-			image2(img2CirclesR);
-			coneCount++;
-		}
-		else if (coneCount>=50 && coneCount<75){//second drawing up
-			image2(img2CirclesU);
-			coneCount++;
-		}
-		counter++;
+	else if (counter == 9 && strokeDone == false)
+	{
+		image1to2();
+		print("stroke is " + strokeDone);
+		print("counter is " + counter);
 	}
-	else if(counter==85){//reset for third drawing
-		background(255);
-		counter++;
-	}
-	else if(counter>85 && counter<125){ //third drawing
-		orange = new TriangleOb();//creating new object
-
-		applyMatrix();
-		if(triCount<40){
-			orange.grow(triCount); //grows larger because triCount is increasing each time
-			angleMode(DEGREES);
-			translate (windowWidth/2, windowHeight/2); //making the rotation center the center of the screen
-			rotate(90*triCount); //rotate each time more, how it over comes the resetting of the matrix bc rotation is still increasing
-			orange.display();
-		}
-		triCount++;
-		resetMatrix();
-		counter++;
-	}
-	else if(counter==125){ //resetting the screen for sketch four
-		frameRate(15);
-		background('#76C3E8');
-		counter++;
-	}
-	else if(counter>125 && counter<280){ //sketch four
-	if(numOfTri<23){
-		sketch4(img4Triangles[numOfTri]);
-		}
-		counter++;
-		}
 	else{
 		counter=0;
 		background(200);
+		strokeDone = false;
+		print("I am done");
 	}
+	//print("counter is " + counter);
 }
 
 //function to change the color of the points of the first sketch
@@ -200,6 +180,46 @@ function image1(){ //first sketch
 			print("y is: " +  y  + " randHeight is: " + randHeight);*/
 			point((randX+x),(windowHeight-y)); //draw point
 		}
+
+function image1to2() {
+		strokeWeight(20);
+		colorArr=colorChange(colorArr); //function to change the color along a scale each time
+		stroke(colorArr[0],colorArr[1],colorArr[2],100); //sets stroke to the new change color
+	
+		if(transitionHeight >= 0){ //checking if the height is zero or greater than, because that means it has reached the top so it draws a new one
+			transitionHeight--; //decrease the height each time so can keep track of where the height has been drawn, know when gets to zero
+			y++; //increases y so that the proper amt can be subtracted from the windowHeight
+			
+			if(widthCounter<40){ //if between 0 and 20 then. going forwards
+				widthCounter++;
+				x++;
+				}
+			else if(widthCounter>=40 && widthCounter<80){ //if between 20 and 40, goes backwards
+				widthCounter++;
+				x--;
+				}
+			else{
+				widthCounter = 0;
+				x=0;
+				}
+			}
+		else {
+			print("stroke is true");
+			strokeDone = true;
+			counter++;
+			}
+		
+	//print("x is " + (leftX + x))	
+	if (strokeDone == false) { // while stroke count is still false, then the points will draw
+		point((leftX + x), (windowHeight - y)); //draw left point
+		point((middleX + x), (windowHeight - y)); //draw middle point
+		point((rightX + x), (windowHeight - y));	//draw right point
+	}
+	
+		
+}
+	
+
 
 function image2(arr) {
 	if(circleCount<25){
