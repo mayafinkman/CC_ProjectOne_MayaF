@@ -47,11 +47,16 @@ let middleX; // value for middle line
 let rightX; //value for right line
 let transitionHeight; //value for the height of the squigles in the transition
 let strokeDone = false;
+//setting up transition circle arrays
+let img1to2CirclesL = [];
+let img1to2CirclesM = [];
+let img1to2CirclesR = [];
+let circleCountT = 0; //same as circleCount variable, but for the transition piece
 
 
 //sketch two variables
-	let img2Circles = [];
-	let img2CirclesR = []; //same but in opposite direction
+	let img2CirclesR = [];
+	let img2CirclesL = []; //same but in opposite direction
 	let img2CirclesU = []; //same but goes in the up direction
 
 	let circleCount = 0; //variable counting each circle that has been drawn
@@ -67,22 +72,36 @@ let img4Triangles = [];
 
 function setup() {
 	createCanvas(windowWidth, windowHeight);
-	background(200);
-	frameRate(200);
+	background(255);
+	frameRate(90);
 	previousCount = 0;
 	transitionHeight = (windowHeight / 3) * 2;
 	leftX = windowWidth / 4;
 	middleX = windowWidth / 2;
 	rightX = (windowWidth / 4)* 3;
 	
+	//set up img1to2Circles with circleOb objects
+	for (let i = 0; i < 15; i++) {
+		let r = 4; //indicates the up moving one
+		img1to2CirclesL[i] = new CircleOb(i, r);
+	}
+	for (let i = 0; i < 15; i++) {
+		let r = 5; //indicates the up moving one
+		img1to2CirclesM[i] = new CircleOb(i, r);
+	}
+	for (let i = 0; i < 15; i++) {
+		let r = 6; //indicates the up moving one
+		img1to2CirclesR[i] = new CircleOb(i, r);
+	}
+	
 	//set up img2Circles with circleOb objects
 	for (let i = 0; i < 25; i++) {
 		let r = 1; //indicates the Left moving one
-		img2Circles[i] = new CircleOb(i,r);
+		img2CirclesR[i] = new CircleOb(i,r);
 	}
 	for (let i = 0; i < 25; i++) {
 		let r = 2; //indicates the right moving one
-		img2CirclesR[i] = new CircleOb(i,r);
+		img2CirclesL[i] = new CircleOb(i,r);
 	}
 	for (let i = 0; i < 25; i++) {
 		let r = 3; //indicates the up moving one
@@ -98,30 +117,42 @@ function draw() {
 		img4Triangles[i] = new thinTriangle();
 	}
 	if (counter < 8) { //first drawing
-		frameRate(200);
 		image1();
 	}
 	else if (counter == 8) { //reset for second drawing
 		colorArr = [20, 20, 20];
 		y = 0;
 		widthCounter = 0;
-		x=0;
+		x = 0;
 		counter++;
 	}
-	else if (counter == 9 && strokeDone == false)
+	else if (counter == 9) //transtition from drawing one to two
 	{
 		image1to2();
-		print("stroke is " + strokeDone);
-		print("counter is " + counter);
+		//print("stroke is " + strokeDone);
+		//print("counter is " + counter);
 	}
-	else{
-		counter=0;
-		background(200);
+	else if (counter == 10) {
 		strokeDone = false;
-		print("I am done");
+		background(255);
+		counter++;
 	}
-	//print("counter is " + counter);
-}
+	else if (counter >= 11 && counter < 35) { //second drawing
+		frameRate(10);
+		image2();
+		counter++;
+	}
+	else if (counter == 35) {//reset for third drawing
+		background(255);
+		counter++;
+		}
+	else {
+		counter = 0;
+		background(255);
+		print("I am done");
+		}
+		//print("counter is " + counter);
+	}
 
 //function to change the color of the points of the first sketch
 function colorChange(colorArr){ 
@@ -185,35 +216,43 @@ function image1to2() {
 		strokeWeight(20);
 		colorArr=colorChange(colorArr); //function to change the color along a scale each time
 		stroke(colorArr[0],colorArr[1],colorArr[2],100); //sets stroke to the new change color
-	
-		if(transitionHeight >= 0){ //checking if the height is zero or greater than, because that means it has reached the top so it draws a new one
+	if (strokeDone == false) {
+		if (transitionHeight >= 0) { //checking if the height is zero or greater than, because that means it has reached the top so it draws a new one
 			transitionHeight--; //decrease the height each time so can keep track of where the height has been drawn, know when gets to zero
 			y++; //increases y so that the proper amt can be subtracted from the windowHeight
 			
-			if(widthCounter<40){ //if between 0 and 20 then. going forwards
+			if (widthCounter < 40) { //if between 0 and 20 then. going forwards
 				widthCounter++;
 				x++;
-				}
-			else if(widthCounter>=40 && widthCounter<80){ //if between 20 and 40, goes backwards
+			}
+			else if (widthCounter >= 40 && widthCounter < 80) { //if between 20 and 40, goes backwards
 				widthCounter++;
 				x--;
-				}
-			else{
+			}
+			else {
 				widthCounter = 0;
-				x=0;
-				}
+				x = 0;
 			}
+		}
 		else {
-			print("stroke is true");
+			//print("stroke is true");
 			strokeDone = true;
-			counter++;
-			}
-		
-	//print("x is " + (leftX + x))	
-	if (strokeDone == false) { // while stroke count is still false, then the points will draw
+		}
 		point((leftX + x), (windowHeight - y)); //draw left point
 		point((middleX + x), (windowHeight - y)); //draw middle point
 		point((rightX + x), (windowHeight - y));	//draw right point
+	}
+	else {
+		frameRate(10);
+		if(circleCountT<15){
+			img1to2CirclesL[circleCountT].display(); 
+			img1to2CirclesM[circleCountT].display(); 
+			img1to2CirclesR[circleCountT].display(); 
+			circleCountT++;
+		}
+		else if (circleCountT>=15){
+			counter++;
+		}
 	}
 	
 		
@@ -222,48 +261,68 @@ function image1to2() {
 
 
 function image2(arr) {
-	if(circleCount<25){
-		arr[circleCount].display(); 
+	if (circleCount < 25) {
+		img2CirclesL[circleCount].display();
+		img2CirclesR[circleCount].display();
+		img2CirclesU[circleCount].display();
 		circleCount++;
 	}
-	else if (circleCount>=25){
-		circleCount=0;
-	}
+
 }
 
-class CircleOb {
+class CircleOb {//class used for the second drawing of circles
 	//want it to move in diff directions depending on x pos
 	//want it to grow in size each time
 
 	constructor(i,r) {
 		//increase x position of each object
 		if(r==(1)){
-			this.xPos = (windowWidth/2) + (pow(1.4,i));
+			this.xPos = (windowWidth/4) - (pow(1.4,i)); //x pos increases to left
 			//increase y position of each object
-			this.yPos = (windowHeight - (windowHeight / 20)) - (i*20);
+			this.yPos = (windowHeight - (windowHeight / 20)) -(i * 20);
 		}
 		else if (r==2){
-			this.xPos = (windowWidth/2) - (pow(1.4,i) );
+			this.xPos = ((windowWidth/4)*3) + (pow(1.4,i) ); //x pos increases to the right 
 			//increase y position of each object
 			this.yPos = (windowHeight - (windowHeight / 20)) - (i*20);
 		}
 		else if (r==3){
-			this.xPos = (windowWidth/2);
+			this.xPos = (windowWidth/2); //x pos stays the same
 			//increase y position of each object
 			this.yPos = (windowHeight - (windowHeight / 20)) - (20*(i+1));
 			//print(this.yPos);
+		}
+		else if (r == 4) { // for the left transition circles
+			this.xPos = ((windowWidth/4) + (((windowHeight / 3) * 2)%80)); //x pos stays the same
+			//increase y position of each object
+			this.yPos = ((windowHeight / 3) ) - (20*(i+1));
+		}
+		else if (r == 5) { // for the middle transition circles
+			this.xPos = ((windowWidth/2)+ (((windowHeight / 3) * 2)%80)); //x pos stays the same
+			//increase y position of each object
+			this.yPos = (windowHeight / 3)  - (20*(i+1));
+		}
+		else if (r == 6) { // for the right transition circles
+			this.xPos = ((windowWidth/4)*3)+ (((windowHeight / 3) * 2)%80); //x pos stays the same
+			//increase y position of each object
+			this.yPos = ((windowHeight / 3) - (20*(i+1)));
 		}
 
 		//print(this.xPos);
 
 		//increase size of each object
-		this.size = 20 + (i*15.5);
+		if (r <= 3) {
+			this.size = 20 + ((i+9)*15.5);
+		}
+		else {
+			this.size = 20 + ((i)*15.5);	
+		}
 	}
 
 	display() {
 		strokeWeight(3);
-		stroke(232, 51, 90);
-		fill(232, 51, 90, 50);
+		stroke(colorArr[0],colorArr[1],colorArr[2]); //making the same color as the top of the squiggle
+		fill(colorArr[0],colorArr[1],colorArr[2],30);
 		circle(this.xPos, this.yPos, this.size);
 	}
 
@@ -315,7 +374,7 @@ function sketch4(obj){
 	}
 	
 }
-class thinTriangle{
+class thinTriangle{ // class used for the fourth drawing of circles 
 	
 	constructor(){
 	this.x1 = 0;
