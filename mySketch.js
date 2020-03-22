@@ -38,7 +38,7 @@ Creative Coding: Project One
 	let x=0;
 	let y=0;
 	let widthCounter=0;
-	let counter = 6; //for switching the screens
+	let counter = 7; //for switching the screens
 	let colorArr= [20,20,20];
 
 //transition from 1 to 2 variables
@@ -52,6 +52,10 @@ let img1to2CirclesL = [];
 let img1to2CirclesM = [];
 let img1to2CirclesR = [];
 let circleCountT = 0; //same as circleCount variable, but for the transition piece
+//variable to calculate in setup where the circles will start
+let leftXC;
+let middleXC;
+let rightXC;
 
 
 //sketch two variables
@@ -69,6 +73,8 @@ let triCount = 0;
 let growCount = 0;
 let numOfTri = 0;
 let img4Triangles = [];
+let centerX; //to get the center X coord of the circle
+let centerY; //to get the center Y coord of the circle
 
 function setup() {
 	createCanvas(windowWidth, windowHeight);
@@ -78,37 +84,53 @@ function setup() {
 	transitionHeight = (windowHeight / 3) * 2;
 	leftX = windowWidth / 4;
 	middleX = windowWidth / 2;
-	rightX = (windowWidth / 4)* 3;
+	rightX = (windowWidth / 4) * 3;
 	
+	//variables for the x start of each of the circleOb transitions
+	if ((transitionHeight % 80) <= 40) {
+		leftXC = leftX + (transitionHeight % 80);
+		middleXC = middleX + (transitionHeight % 80);
+		rightXC = rightX + (transitionHeight % 80);
+	}
+	else if ((transitionHeight % 80) > 40) {
+		let diff = 40 - ((transitionHeight % 80) - 40);
+		leftXC = leftX + diff;
+		middleXC = middleX + diff;
+		rightXC = rightX + diff;
+	}
 	//set up img1to2Circles with circleOb objects
 	for (let i = 0; i < 15; i++) {
-		let r = 4; //indicates the up moving one
-		img1to2CirclesL[i] = new CircleOb(i, r);
+		let r = 4; //indicates the left moving one
+		img1to2CirclesL[i] = new CircleOb(i, r); 
 	}
 	for (let i = 0; i < 15; i++) {
 		let r = 5; //indicates the up moving one
 		img1to2CirclesM[i] = new CircleOb(i, r);
 	}
 	for (let i = 0; i < 15; i++) {
-		let r = 6; //indicates the up moving one
+		let r = 6; //indicates the right moving one
 		img1to2CirclesR[i] = new CircleOb(i, r);
 	}
-	
+
 	//set up img2Circles with circleOb objects
-	for (let i = 0; i < 25; i++) {
+	for (let i = 0; i < 18; i++) {
 		let r = 1; //indicates the Left moving one
 		img2CirclesR[i] = new CircleOb(i,r);
 	}
-	for (let i = 0; i < 25; i++) {
+	for (let i = 0; i < 18; i++) {
 		let r = 2; //indicates the right moving one
 		img2CirclesL[i] = new CircleOb(i,r);
 	}
-	for (let i = 0; i < 25; i++) {
+	for (let i = 0; i < 18; i++) {
 		let r = 3; //indicates the up moving one
 		img2CirclesU[i] = new CircleOb(i,r);
 	}
 	
-	
+	//set center equal to the center coordinates of the last center circle drawn so can make the triangle grow inside
+	centerX = img2CirclesU[17].getXCoord();
+	centerY = img2CirclesU[17].getYCoord();
+	//print("center x is " + centerX);
+	//print("center y is " + centerY);
 }
 
 function draw() {
@@ -119,7 +141,7 @@ function draw() {
 	if (counter < 8) { //first drawing
 		image1();
 	}
-	else if (counter == 8) { //reset for second drawing
+	else if (counter == 8) { //reset for transition drawing
 		colorArr = [20, 20, 20];
 		y = 0;
 		widthCounter = 0;
@@ -129,7 +151,7 @@ function draw() {
 	else if (counter == 9) //transtition from drawing one to two
 	{
 		image1to2();
-		//print("stroke is " + strokeDone);
+		print("stroke is " + strokeDone);
 		//print("counter is " + counter);
 	}
 	else if (counter == 10) {
@@ -137,19 +159,32 @@ function draw() {
 		background(255);
 		counter++;
 	}
-	else if (counter >= 11 && counter < 35) { //second drawing
+	else if (counter >= 11 && counter < 40) { //second drawing
 		frameRate(10);
 		image2();
 		counter++;
 	}
-	else if (counter == 35) {//reset for third drawing
-		background(255);
-		counter++;
-		}
+	else if (counter >=40 && counter<195) {//third drawing, in this case is sketch 4 since i am not doing sketch 3
+		if(numOfTri<23){
+			image4(img4Triangles[numOfTri]);
+			}
+			counter++;
+			}
 	else {
 		counter = 0;
+		colorArr=[20,20,20]; //reseting the rgb color to 20,20,20 so it starts with black each time
+		strokeDone = false;
 		background(255);
-		print("I am done");
+		frameRate(90);
+		//resetting the variables for the images to work
+		transitionHeight = (windowHeight / 3) * 2;
+		y = 0;
+		widthCounter = 0;
+		circleCountT = 0;
+		circleCount = 0;
+		growCount = 0;
+		numOfTri = 0;
+		//print("I am done");
 		}
 		//print("counter is " + counter);
 	}
@@ -176,7 +211,6 @@ function colorChange(colorArr){
 	
 	
 }
-
 function image1(){ //first sketch
 	strokeWeight(20);
 		colorArr=colorChange(colorArr); //function to change the color along a scale each time
@@ -211,11 +245,10 @@ function image1(){ //first sketch
 			print("y is: " +  y  + " randHeight is: " + randHeight);*/
 			point((randX+x),(windowHeight-y)); //draw point
 		}
-
 function image1to2() {
-		strokeWeight(20);
-		colorArr=colorChange(colorArr); //function to change the color along a scale each time
-		stroke(colorArr[0],colorArr[1],colorArr[2],100); //sets stroke to the new change color
+	strokeWeight(20);
+	colorArr=colorChange(colorArr); //function to change the color along a scale each time
+	stroke(colorArr[0],colorArr[1],colorArr[2],100); //sets stroke to the new change color
 	if (strokeDone == false) {
 		if (transitionHeight >= 0) { //checking if the height is zero or greater than, because that means it has reached the top so it draws a new one
 			transitionHeight--; //decrease the height each time so can keep track of where the height has been drawn, know when gets to zero
@@ -235,7 +268,7 @@ function image1to2() {
 			}
 		}
 		else {
-			//print("stroke is true");
+			y=0; //resets y to zero 
 			strokeDone = true;
 		}
 		point((leftX + x), (windowHeight - y)); //draw left point
@@ -243,6 +276,7 @@ function image1to2() {
 		point((rightX + x), (windowHeight - y));	//draw right point
 	}
 	else {
+		stroke(colorArr[0],colorArr[1],colorArr[2],100);
 		frameRate(10);
 		if(circleCountT<15){
 			img1to2CirclesL[circleCountT].display(); 
@@ -257,11 +291,8 @@ function image1to2() {
 	
 		
 }
-	
-
-
 function image2(arr) {
-	if (circleCount < 25) {
+	if (circleCount < 18) {
 		img2CirclesL[circleCount].display();
 		img2CirclesR[circleCount].display();
 		img2CirclesU[circleCount].display();
@@ -269,7 +300,6 @@ function image2(arr) {
 	}
 
 }
-
 class CircleOb {//class used for the second drawing of circles
 	//want it to move in diff directions depending on x pos
 	//want it to grow in size each time
@@ -293,17 +323,17 @@ class CircleOb {//class used for the second drawing of circles
 			//print(this.yPos);
 		}
 		else if (r == 4) { // for the left transition circles
-			this.xPos = ((windowWidth/4) + (((windowHeight / 3) * 2)%80)); //x pos stays the same
+			this.xPos = leftXC; //x pos stays the same
 			//increase y position of each object
 			this.yPos = ((windowHeight / 3) ) - (20*(i+1));
 		}
 		else if (r == 5) { // for the middle transition circles
-			this.xPos = ((windowWidth/2)+ (((windowHeight / 3) * 2)%80)); //x pos stays the same
+			this.xPos =middleXC; //x pos stays the same
 			//increase y position of each object
 			this.yPos = (windowHeight / 3)  - (20*(i+1));
 		}
 		else if (r == 6) { // for the right transition circles
-			this.xPos = ((windowWidth/4)*3)+ (((windowHeight / 3) * 2)%80); //x pos stays the same
+			this.xPos = rightXC; //x pos stays the same
 			//increase y position of each object
 			this.yPos = ((windowHeight / 3) - (20*(i+1)));
 		}
@@ -326,8 +356,15 @@ class CircleOb {//class used for the second drawing of circles
 		circle(this.xPos, this.yPos, this.size);
 	}
 
-}
+	getXCoord() {
+		return this.xPos;
+	}
 
+	getYCoord() {
+		return this.yPos;
+	}
+
+}
 class TriangleOb{ //third sketch class
 	constructor(){
 	this.x1 = 0;
@@ -356,11 +393,11 @@ class TriangleOb{ //third sketch class
 	}
 }
 
-function sketch4(obj){
+function image4(obj){
 	if(growCount<5){
 		applyMatrix();
 		angleMode(DEGREES);
-		translate(windowWidth/2, windowHeight/2);
+		translate(centerX, centerY);
 		rotate(47*numOfTri);
 		obj.grow(growCount);
 		obj.display();
@@ -395,7 +432,7 @@ class thinTriangle{ // class used for the fourth drawing of circles
 
 	display(){
 		strokeWeight(4);
-		stroke(random(100,200), random(100,200), random(200,255));
+		stroke(random(200,255), random(0,50), random(150,255));
 		fill(150, 25);
 		triangle(this.x1, this.y1, this.x2, this.y2, this.x3, this.y3);
 		
